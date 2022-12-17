@@ -2,7 +2,7 @@
 
 import supervisor
 supervisor.disable_autoreload()
-
+import time
 from board import SCL, SDA
 import busio
 import adafruit_midi
@@ -44,53 +44,45 @@ midicontroller = MidiController(trelli)
 # edge = EDGE_RISING on button press
 # edge = EDGE_FALLING on button release
 def start_stop_note(x, y, edge):
-    if edge == NeoTrellis.EDGE_RISING:
-        midicontroller.color(x, y, (255, 0, 0))
-        print("Playing: "+str(midicontroller.button_to_note(x,y)))
+    if edge == NeoTrellis.EDGE_RISING or edge == NeoTrellis.EDGE_HIGH:
+        midicontroller.color(x, y, midicontroller.random_0_255_tuple())
+        # print("Playing: "+str(midicontroller.button_to_note(x,y)))
         midi.send(NoteOn(midicontroller.button_to_note(x,y)))
         
     else:
         midi.send(NoteOff(midicontroller.button_to_note(x,y), 0))
-        midicontroller.color(x, y, midicontroller.random_0_255_tuple())
+        midicontroller.color(x, y, OFF)
 
 def change_scale_mode(x, y, edge):
-    if edge == NeoTrellis.EDGE_RISING:
-        if y >= len(midicontroller.scale_array):
-                return
-        midicontroller.setScaleMode(midicontroller.scale_array[y])
+    if y >= len(midicontroller.scale_array):
+            return
+    midicontroller.setScaleMode(midicontroller.scale_array[y])
 
 def change_root_note(x, y, edge):
-    if edge == NeoTrellis.EDGE_RISING:
-        print("change note callback")
-        midicontroller.setRootNote(midicontroller.note_list_chromatic[x])
+    midicontroller.setRootNote(midicontroller.note_list_chromatic[x])
 
 # Boot sequence ~~~ 
 # Enable Callbacks
-for y in range(8):
-    for x in range(8):
-        # activate rising edge events on all keys
+for y in range(6):
+    for x in range(7):
+        # Main note-playing area, 6 row, 7 column
         midicontroller.activate_key(x, y, NeoTrellis.EDGE_RISING, True)
-
-        # activate falling edge events on all keys
-        midicontroller.activate_key(x, y, NeoTrellis.EDGE_FALLING, True)
-
-        # Rightmost column is dedicated to mode selection
-        # Bottom 2 Rows dedicated to Note change
-        #So we set those callbacks elsewhere
-        if x == 7 or y > 6:
-            break
+        midicontroller.activate_key(x, y, NeoTrellis.EDGE_FALLING, True)      
         
         midicontroller.set_callback(x, y, start_stop_note)
         midicontroller.color(x, y, midicontroller.random_0_255_tuple())
-
         # Uncomment to have more of a startup animation
         # time.sleep(0.05)
 
 for y in range(7):
+    # Rightmost Column, controls the scale mode
+    midicontroller.activate_key(7, y, NeoTrellis.EDGE_RISING, True)
     midicontroller.set_callback(7, y, change_scale_mode)
     midicontroller.color(7, y, midicontroller.random_0_255_tuple())
 
 for x in range(7):
+    # Bottom two rows, controls root of key
+    midicontroller.activate_key(x, 7, NeoTrellis.EDGE_RISING, True)
     midicontroller.set_callback(x, 7, change_root_note)
     midicontroller.color(x, 7, midicontroller.random_0_255_tuple())
 
@@ -102,4 +94,5 @@ for y in range(8):
 # Infinite loop of music
 while True:
     midicontroller.sync()
+    time.sleep(0.02)
 

@@ -10,13 +10,13 @@ class MidiNotes:
 
         # Note offset from root of the 7 major western modes
         self.scales = {
-            'ionian'    :  [0,2,4,5,7,9,11,128],
-            'dorian'    :  [0,2,3,5,7,8,10,128],
-            'phrygian'  :  [0,1,3,5,7,8,10,128],
-            'lydian'    :  [0,2,4,6,7,9,11,128],
-            'mixolydian':  [0,2,4,5,7,9,10,128],
-            'aeolian'   :  [0,2,3,5,7,8,10,128],
-            'locrian'   :  [0,1,3,5,6,8,10,128]
+            'ionian'    :  [0,2,4,5,7,9,11],
+            'dorian'    :  [0,2,3,5,7,8,10],
+            'phrygian'  :  [0,1,3,5,7,8,10],
+            'lydian'    :  [0,2,4,6,7,9,11],
+            'mixolydian':  [0,2,4,5,7,9,10],
+            'aeolian'   :  [0,2,3,5,7,8,10],
+            'locrian'   :  [0,1,3,5,6,8,10]
         }
 
         self.scale_array = []
@@ -35,6 +35,7 @@ class MidiController(MultiTrellis, MidiNotes):
         self.current_scale_mode = self.scale_array[0]
         self.current_rootnote = self.note_list_chromatic[0]
         self.velocity = 127
+        self.modifier_down = False
         
 
     # Honestly this belongs elsewhere, I just like random colors
@@ -54,9 +55,9 @@ class MidiController(MultiTrellis, MidiNotes):
         self.current_rootnote = newNote
 
     def button_to_note(self, x,y):
-        # choose the root note and scale
+        # maps x,y to be rows of octaves, columns of notes in key
         note = self.current_rootnote + self.current_scale_mode[x]
-        # Shift y to map lower octives onto keypad   
+        # Shift y to map lower octaves onto keypad   
         octave = (y-2)*12
         note = note + octave
         if note > 127:
