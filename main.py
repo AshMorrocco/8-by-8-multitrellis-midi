@@ -1,4 +1,8 @@
 # Designed for Adafruit 8x8 Neotrellis with M4 Express Feather
+
+import supervisor
+supervisor.disable_autoreload()
+
 from board import SCL, SDA
 import busio
 import adafruit_midi
@@ -42,11 +46,12 @@ midicontroller = MidiController(trelli)
 def start_stop_note(x, y, edge):
     if edge == NeoTrellis.EDGE_RISING:
         midicontroller.color(x, y, (255, 0, 0))
+        print("Playing: "+str(midicontroller.button_to_note(x,y)))
         midi.send(NoteOn(midicontroller.button_to_note(x,y)))
         
     else:
         midi.send(NoteOff(midicontroller.button_to_note(x,y), 0))
-        midicontroller.color(x, y, (0,0,0))
+        midicontroller.color(x, y, midicontroller.random_0_255_tuple())
 
 def change_scale_mode(x, y, edge):
     if edge == NeoTrellis.EDGE_RISING:
@@ -54,6 +59,10 @@ def change_scale_mode(x, y, edge):
                 return
         midicontroller.setScaleMode(midicontroller.scale_array[y])
 
+def change_root_note(x, y, edge):
+    if edge == NeoTrellis.EDGE_RISING:
+        print("change note callback")
+        midicontroller.setRootNote(midicontroller.note_list_chromatic[x])
 
 # Boot sequence ~~~ 
 # Enable Callbacks
@@ -66,15 +75,24 @@ for y in range(8):
         midicontroller.activate_key(x, y, NeoTrellis.EDGE_FALLING, True)
 
         # Rightmost column is dedicated to mode selection
-        if x == 7:
-            midicontroller.set_callback(x, y, change_scale_mode)
-        else:
-            midicontroller.set_callback(x, y, start_stop_note)
+        # Bottom 2 Rows dedicated to Note change
+        #So we set those callbacks elsewhere
+        if x == 7 or y > 6:
+            break
         
+        midicontroller.set_callback(x, y, start_stop_note)
         midicontroller.color(x, y, midicontroller.random_0_255_tuple())
 
         # Uncomment to have more of a startup animation
         # time.sleep(0.05)
+
+for y in range(7):
+    midicontroller.set_callback(7, y, change_scale_mode)
+    midicontroller.color(7, y, midicontroller.random_0_255_tuple())
+
+for x in range(7):
+    midicontroller.set_callback(x, 7, change_root_note)
+    midicontroller.color(x, 7, midicontroller.random_0_255_tuple())
 
 # Turn off the pretty lights to finish boot sequence
 for y in range(8):
