@@ -35,7 +35,10 @@ class MidiController(MultiTrellis, MidiNotes):
         self.current_scale_mode = self.scale_array[0]
         self.current_rootnote = self.note_list_chromatic[0]
         self.velocity = 127
-        self.modifier_down = False
+        self.left_modifier_down = False
+        self.right_modifier_down = False
+        self.highlighted_scale = { 'x': 0, 'y': 0}
+        self.highlighted_note = { 'x': 0, 'y': 0}
         
 
     # Honestly this belongs elsewhere, I just like random colors
@@ -47,14 +50,28 @@ class MidiController(MultiTrellis, MidiNotes):
         return self.current_scale_mode
 
     def setScaleMode(self, newScale):
-        print("Setting Scale to "+str(newScale))
+        # print("Setting Scale to "+str(newScale))
         self.current_scale_mode = newScale
 
     def setRootNote(self, newNote):
-        print("Setting Root Note to "+str(newNote))
+        # print("Setting Root Note to "+str(newNote))
         self.current_rootnote = newNote
 
-    def button_to_note(self, x,y):
+    def highlightScale(self, newx, newy, color):
+        self.color(self.highlighted_scale['x'],self.highlighted_scale['y'],(0,0,0))
+        self.highlighted_scale['x'] = newx
+        self.highlighted_scale['y'] = newy
+        self.color(self.highlighted_scale['x'],self.highlighted_scale['y'],color)
+
+    # Turn off previous highlighted key, update key, turn on 
+    def highlightNote(self, newx, newy, color):
+        self.color(self.highlighted_note['x'],self.highlighted_note['y'],(0,0,0))
+        self.highlighted_note['x'] = newx
+        self.highlighted_note['y'] = newy
+        self.color(self.highlighted_note['x'],self.highlighted_note['y'],color)
+    
+    # Turn off previous highlighted key, update key, turn on 
+    def button_to_note(self, x, y):
         # maps x,y to be rows of octaves, columns of notes in key
         note = self.current_rootnote + self.current_scale_mode[x]
         # Shift y to map lower octaves onto keypad   
