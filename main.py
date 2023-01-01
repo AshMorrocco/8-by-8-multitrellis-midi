@@ -62,8 +62,15 @@ def change_scale_mode(x, y, edge):
     midicontroller.highlightScale(x,y, LTBLUE)
 
 def change_root_note(x, y, edge):
-    midicontroller.setRootNote(midicontroller.note_list_chromatic[x])
-    midicontroller.highlightNote(x,y, PINK)
+    if y == 6 and (x == 0 or x == 3):
+        print("This isn't right...")
+    else:
+        midicontroller.setRootNote(map_x_y_to_note(x, y))
+        midicontroller.highlightNote(x,y, PINK)
+
+def map_x_y_to_note(x,y):
+    note = x
+    return midicontroller.note_list_chromatic[x]
 
 def modifier_toggle(x,y,edge):
     if edge == NeoTrellis.EDGE_RISING or edge == NeoTrellis.EDGE_HIGH:
@@ -102,21 +109,28 @@ for y in range(7):
 
 
 for x in range(7):
-    # Bottom two rows, controls root of key
-    midicontroller.activate_key(x, 7, NeoTrellis.EDGE_RISING, True)
-    midicontroller.set_callback(x, 7, change_root_note)
-    midicontroller.color(x, 7, midicontroller.random_0_255_tuple())
-
-# (0,6) is Modifier 1 
-# (3,6) is Modifier 2
-midicontroller.activate_key(0, 6, NeoTrellis.EDGE_RISING, True)
-midicontroller.activate_key(0, 6, NeoTrellis.EDGE_FALLING, True)
-midicontroller.set_callback(0, 6, modifier_toggle)
-midicontroller.color(0, 6, midicontroller.random_0_255_tuple())
-midicontroller.activate_key(3, 6, NeoTrellis.EDGE_RISING, True)
-midicontroller.activate_key(3, 6, NeoTrellis.EDGE_FALLING, True)
-midicontroller.set_callback(3, 6, modifier_toggle)
-midicontroller.color(3, 6, midicontroller.random_0_255_tuple())
+    # Bottom two rows 
+    # laid out like a keyboard with 2 modifier keys
+    if x == 0 or x == 3:
+        # (0,6) is Modifier 1 
+        # (3,6) is Modifier 2
+        # So set top row with toggle modifier callbacks on rise and fall
+        midicontroller.activate_key(x, 6, NeoTrellis.EDGE_RISING, True)
+        midicontroller.activate_key(x, 6, NeoTrellis.EDGE_FALLING, True)
+        midicontroller.set_callback(x, 6, modifier_toggle)
+        midicontroller.color(x, 6, midicontroller.random_0_255_tuple())
+        # otherwise we want change root note callback
+        midicontroller.activate_key(x, 7, NeoTrellis.EDGE_RISING, True)
+        midicontroller.set_callback(x, 7, change_root_note)
+        midicontroller.color(x, 7, midicontroller.random_0_255_tuple())
+    else:
+         # otherwise we want change root note callback for both rows
+        midicontroller.activate_key(x, 6, NeoTrellis.EDGE_RISING, True)
+        midicontroller.set_callback(x, 6, change_root_note)
+        midicontroller.color(x, 6, midicontroller.random_0_255_tuple())
+        midicontroller.activate_key(x, 7, NeoTrellis.EDGE_RISING, True)
+        midicontroller.set_callback(x, 7, change_root_note)
+        midicontroller.color(x, 7, midicontroller.random_0_255_tuple())
 
 # Turn off the pretty lights to finish boot sequence
 for y in range(8):
