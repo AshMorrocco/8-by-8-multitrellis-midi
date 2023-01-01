@@ -57,20 +57,46 @@ def start_stop_note(x, y, edge):
 
 def change_scale_mode(x, y, edge):
     if y >= len(midicontroller.scale_array):
-            return
+        return
     midicontroller.setScaleMode(midicontroller.scale_array[y])
     midicontroller.highlightScale(x,y, LTBLUE)
 
 def change_root_note(x, y, edge):
-    if y == 6 and (x == 0 or x == 3):
-        print("This isn't right...")
-    else:
-        midicontroller.setRootNote(map_x_y_to_note(x, y))
-        midicontroller.highlightNote(x,y, PINK)
+    midicontroller.setRootNote( map_x_y_to_note(x, y))
+    midicontroller.highlightNote(x,y, PINK)
 
 def map_x_y_to_note(x,y):
-    note = x
-    return midicontroller.note_list_chromatic[x]
+    dict_notes = { #[x][y]
+        0:{ 
+            6:  0, # Modifier 1
+            7: 60
+        },
+        1:{ 
+            6: 61,
+            7: 62
+        },
+        2:{ 
+            6: 63,
+            7: 64
+        },
+        3:{ 
+            6:  0, # Modifier 2
+            7: 65
+        },
+        4:{ 
+            6: 66,
+            7: 67
+        },
+        5:{ 
+            6: 68,
+            7: 69
+        },
+        6:{ 
+            6: 70,
+            7: 71
+        },
+}
+    return dict_notes[x][y]
 
 def modifier_toggle(x,y,edge):
     if edge == NeoTrellis.EDGE_RISING or edge == NeoTrellis.EDGE_HIGH:
