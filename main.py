@@ -67,15 +67,18 @@ def change_root_note(x, y, edge):
 
 def modifier_toggle(x,y,edge):
     if edge == NeoTrellis.EDGE_RISING or edge == NeoTrellis.EDGE_HIGH:
-        print ("Modifier Down: "+int(y))
-        if y == 0:
+        if x == 0:
+            print("Mod 1 On")
             midicontroller.left_modifier_down = True
-        if y == 3:
+        if x == 3:
+            print("Mod 2 On")
             midicontroller.right_modifier_down = True
     else:
-        if y == 0:
+        if x == 0:
+            print("Mod 1 Off")
             midicontroller.left_modifier_down = False
-        if y == 3:
+        if x == 3:
+            print("Mod 2 Off")
             midicontroller.right_modifier_down = False
 
 # Boot sequence ~~~ 
@@ -97,11 +100,23 @@ for y in range(7):
     midicontroller.set_callback(7, y, change_scale_mode)
     midicontroller.color(7, y, midicontroller.random_0_255_tuple())
 
+
 for x in range(7):
     # Bottom two rows, controls root of key
     midicontroller.activate_key(x, 7, NeoTrellis.EDGE_RISING, True)
     midicontroller.set_callback(x, 7, change_root_note)
     midicontroller.color(x, 7, midicontroller.random_0_255_tuple())
+
+# (0,6) is Modifier 1 
+# (3,6) is Modifier 2
+midicontroller.activate_key(0, 6, NeoTrellis.EDGE_RISING, True)
+midicontroller.activate_key(0, 6, NeoTrellis.EDGE_FALLING, True)
+midicontroller.set_callback(0, 6, modifier_toggle)
+midicontroller.color(0, 6, midicontroller.random_0_255_tuple())
+midicontroller.activate_key(3, 6, NeoTrellis.EDGE_RISING, True)
+midicontroller.activate_key(3, 6, NeoTrellis.EDGE_FALLING, True)
+midicontroller.set_callback(3, 6, modifier_toggle)
+midicontroller.color(3, 6, midicontroller.random_0_255_tuple())
 
 # Turn off the pretty lights to finish boot sequence
 for y in range(8):
